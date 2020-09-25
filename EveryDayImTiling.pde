@@ -64,28 +64,97 @@ void setMargins() {
 
 void drawTiles() {
   int tileCount = 0;
+  boolean canDrawMoreTiles = true;
+  
+  if (!canDrawMoreTiles) return;
   
   // Redraw operations
   tileCount++;
   int pX = 0;
   int pY = 0;
+  int mxmin = 0;
+  int mymin = 0;
   
-  //TODO: algorithm to be filled out here
+  // TODO: Add loop around entire block - 
+  
+  // Generate a new point
+    int[]  point = generateRandomDimensions(pX,pY);
+    boolean isInBox = false;
+    
+     while (!isInBox) {
+       // If (px + dmin) , (py + dmax) is not in the frame
+       
+       if (isPointInBox(point[0], point[1], 0, 0, _frameX, _frameY)) {          
+         isInBox = true;
+         // Draw a rectangle starting at (px, py) the adjusted dimensions
+         fill(color(random(255), random(255), random(255)));
+         rect(pX, pY, point[0]-pX, point[1]-pY);        
+       } else {
+       
+         // decrement one of the dimensions at random  at try again
+         int isOne = int(random(1));
+       
+         if (point[0] - pX > _dimMin) point[0] = point[0] - isOne;
+       
+         if (point[1] - pY > _dimMin) point[1] = point[1] - (1 - isOne);
+       
+         // Or if both the dimension <= dmin, return error (cannot create any more tiles)
+         if ((point[0] - pX < _dimMin) && (point[1] - pY < _dimMin)) {
+           print("Cannot draw any more tiles!");
+           canDrawMoreTiles = false;
+          }                
+        }
+      }
+    
+    // Choose a new point (generate new point) based on randomized rules along x/y axes
+    int[] newPoint = generateNewPoint(pX, pY, int(random(point[0] - pX)), int(random(point[1] - pY)));
+  
+    if (!isPointInBox(newPoint[0], newPoint[1], 0, 0, _frameX, _frameY)) {
+        
+      // If it's not in the frame, update mxmin, mymin 
+      
+    } else {
+       pX = newPoint[0];
+       pY = newPoint[1];
+    }
+  
+  
+  // Stop when mxmin / mymin is no longer in the minimum bounded box
+  if (isPointInBox(mxmin, mymin, _margin, _margin, _frameX - _margin, _frameY - _margin)) {
+      canDrawMoreTiles = false;
+  }
 }
 
 // Determines if a point falls within the box boundary
-boolean isPointInBox(int x, int y, int xmin, int ymin, int xmax, int ymax) {
-  return false;
+boolean isPointInBox(int x, int y, int xmin, int ymin, int xmax, int ymax) { 
+  boolean isXIn = (xmin <= x) && (x <= xmax);
+  boolean isYIn = (ymin <= y) && (y <= ymax);
+ 
+  return (isXIn && isYIn);
 }
 
 // Returns a randomly generated pair of integers between dmin and dmax, inclusive
-int[] generateRandomDimensions(int dmin, int dmax) {  
-  int[] point = { 0, 0 };
+int[] generateRandomDimensions(int x, int y) {  
+  int[] point = { x + _dimMin + int(random(_dimMax-_dimMin)), y + _dimMin + int(random(_dimMax-_dimMin)) };
   return point;
 }
 
 // Generates a new point from two formulas that are chosen at random
 int[] generateNewPoint(int x1, int y1,  int d1, int d2) {
-  int[] point = { 0, 0 };
-  return point;
+  
+  int isOne = int(random(1));
+  int px = x1;
+  int py = y1;
+  
+  if (isOne == 1) {
+      px = x1 + d1;    
+      py = y1;    
+  } else {
+     px = x1;
+     py = y1 + d2;
+  }
+   
+  int[] result = { px, py };
+  
+  return result;
 }
